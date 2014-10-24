@@ -1,0 +1,12 @@
+#ifndef ${header_name}
+#define ${header_name}
+
+% for file in include_files:
+#include "${file}"
+% endfor
+
+% for idx, var in enumerate(var_names):
+${class_names[idx]} ${var}();
+% endfor
+
+#endif
