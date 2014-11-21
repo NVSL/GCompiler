@@ -2,11 +2,11 @@
 #define ${header_name}
 
 % for file in include_files:
-#include "${file}"
+#include "../${file}/${file}.h"
 % endfor
 
 % for idx, var in enumerate(var_names):
-${class_names[idx]} ${var}();
+${class_names[idx]} ${var}(${args[idx]});
 % endfor
 
 #endif

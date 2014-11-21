@@ -22,7 +22,8 @@ class GComponent(object):
         try:
             catalog_element = self._catalog.getItems()[self.type]
             self.class_name = catalog_element.find("API/arduino/class").get("name")
-            self.include_files = [include.get("file") for include in catalog_element.findall("API/arduino/include")]
+            self.args = [arg.get("net") for arg in e.findall("API/class/arg")]
+            self.include_files = [os.path.splitext(include.get("file"))[0] for include in catalog_element.findall("API/arduino/include")]
         except Exception as e:
             print e
             sys.exit(-1)
@@ -40,12 +41,14 @@ def generate_header_file(header_name, g_components):
     flatten_include_files = list(set(flatten_include_files))
 
     class_names = [component.class_name for component in g_components]
+    args = [','.join(component.args) for component in g_components]
     var_names = [component.var_name for component in g_components]
 
     file_text =  mytemplate.render(header_name=header_name,
                                    include_files=flatten_include_files,
                                    class_names=class_names,
-                                   var_names=var_names)
+                                   var_names=var_names,
+                                   args=args)
 
     return file_text
 
