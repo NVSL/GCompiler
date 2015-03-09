@@ -2,7 +2,7 @@
 #define ${header_name}
 
 % for file in include_files:
-#include "../${file}/${file}.h"
+#include "../${file}"
 % endfor
 
 % for idx, var in enumerate(var_names):

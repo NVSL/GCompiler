@@ -1,0 +1,15 @@
+// Test code for ${var}
+if (${var}.buttonPressed()) {
+       Serial.println("${var} pressed");
+}
+
+if (${var}.buttonReleased()) {
+       Serial.println("${var} released");
+}
+
+if (${var}.buttonDown()) {
+       Serial.println("${var} is down");
+}
+
+delay(10);
+// End test code for ${var}
