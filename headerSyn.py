@@ -11,6 +11,7 @@ import asciitree
 import parseAST
 # from itertools import chain
 
+sketchbook_path = "../../Designs/GadgetronSketchBook/libraries"
 
 class GComponent(object):
     # __catalog_path = "../../Libraries/Components/Catalog/Components.cat"
@@ -25,6 +26,7 @@ class GComponent(object):
         self.linked_as = ""
         self.path = ""
         self.link_path = ""
+        self.include_files = []
 
         try:
             catalog_element = self._catalog.getItems()[self.type]
@@ -104,32 +106,46 @@ def generate_test_file(header_name, g_components):
     #     loop_template = Template(filename=os.path.dirname(os.path.realpath(__file__)) + '/' + class_name + '_loop.txt')
     #     loop_codes.append(loop_template.render(var=component.var_name))
 
-    testtemplate = Template(filename=os.path.dirname(os.path.realpath(__file__)) + '/testtemplate.txt')
-    # testcodes = testtemplate.render(header_name=header_name, component_setups=setup_codes, component_loops=loop_codes, components=g_components)
-    testcodes = testtemplate.render(header_name=header_name, components=g_components)
+    clang.cindex.Config.set_library_path('/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib')
+    index = clang.cindex.Index.create()
+
+    real_components = []
 
     for component in g_components:
         for include in component.include_files:
-            check_method(include + ".h")
+            flag = check_method(os.path.join(sketchbook_path, component.linked_as, include + ".h"), index)
+            if flag:
+                real_components.append(component)
 
+    testtemplate = Template(filename=os.path.dirname(os.path.realpath(__file__)) + '/testtemplate.txt')
+    # testcodes = testtemplate.render(header_name=header_name, component_setups=setup_codes, component_loops=loop_codes, components=g_components)
+    testcodes = testtemplate.render(header_name=header_name, components=real_components)
 
     return testcodes
 
 
-def check_method(header):
-    clang.cindex.Config.set_library_path('/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib')
-    index = clang.cindex.Index.create()
+def check_method(header, index):
     print header
-    translation_unit = index.parse(header, ['-x', 'c++', '-std=c++11', '-D__CODE_GENERATOR__'])
+    flag = True
+    try:
+        translation_unit = index.parse(header, ['-x', 'c++', '-std=c++11', '-D__CODE_GENERATOR__'])
+        # print(asciitree.draw_tree(translation_unit.cursor, parseAST.node_children, parseAST.print_node))
+        classes = parseAST.build_classes(translation_unit.cursor)
+        for aClass in classes:
+            # print 'For class ' + aClass.name + ', public methods:'
+            # for aFunction in aClass.functions:
+            #     print aFunction
+            if "setup" not in aClass.functions:
+                flag = False
 
-    print(asciitree.draw_tree(translation_unit.cursor, parseAST.node_children, parseAST.print_node))
+            if "loop" not in aClass.functions:
+                flag = False
 
-    classes = parseAST.build_classes(translation_unit.cursor)
+    except Exception as e:
+        print e
+        flag = False
 
-    for aClass in classes:
-        print 'For class ' + aClass.name + ', public methods:'
-        for aFunction in aClass.functions:
-            print aFunction
+    return flag
 
 
 if __name__ == "__main__":
