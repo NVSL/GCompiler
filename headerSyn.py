@@ -34,7 +34,7 @@ class GComponent(object):
             catalog_element = self._catalog.getItems()[self.type]
             class_element = catalog_element.find("API/arduino/class")
             if class_element != None:
-                print self.type
+                # print self.type
                 self.class_name = class_element.get("name")
                 arg_names = e.findall("api/arg")
                 interfaces = catalog_element.find("electrical/interfaces")
@@ -55,7 +55,7 @@ class GComponent(object):
 
 def check_interface(interfaces, arg_name):
     for i in interfaces:
-        print i.get("net")
+        # print i.get("net")
         if i.get("net") == arg_name.get("arg"):
             if i.get("type") == "DigitalWireInterface":
                 return DIGITAL
