@@ -12,6 +12,8 @@ import parseAST
 # from itertools import chain
 
 sketchbook_path = "../../Designs/GadgetronSketchBook/libraries"
+DIGITAL = "D"
+ANALOG = "A"
 
 class GComponent(object):
     # __catalog_path = "../../Libraries/Components/Catalog/Components.cat"
@@ -34,7 +36,9 @@ class GComponent(object):
             if class_element != None:
                 print self.type
                 self.class_name = class_element.get("name")
-                self.args = [arg.get("digitalliteral") if arg.get("analogliteral") == "None" else arg.get("analogliteral") for arg in e.findall("api/arg")]
+                arg_names = e.findall("api/arg")
+                interfaces = catalog_element.find("electrical/interfaces")
+                self.args = [arg.get("digitalliteral") if check_interface(interfaces, arg) == DIGITAL else arg.get("analogliteral") for arg in arg_names]
                 self.include_files = [os.path.splitext(include.get("file"))[0] for include in catalog_element.findall("API/arduino/include")]
                 libdir = catalog_element.findall("API/arduino/libdirectory")
                 if len(libdir) > 0:
@@ -47,6 +51,18 @@ class GComponent(object):
         except Exception as e:
             print e
             sys.exit(-1)
+
+
+def check_interface(interfaces, arg_name):
+    for i in interfaces:
+        print i.get("net")
+        if i.get("net") == arg_name.get("arg"):
+            if i.get("type") == "DigitalWireInterface":
+                return DIGITAL
+            elif i.get("type") == "AnalogWireInterface":
+                return ANALOG
+
+    return None
 
 
 def generate_header_file(header_name, g_components):
@@ -71,7 +87,7 @@ def generate_header_file(header_name, g_components):
             args.append(','.join(component.args))
             var_names.append(component.var_name)
 
-    file_text =  mytemplate.render(header_name=header_name,
+    file_text =  mytemplate.render(header_name="HEADER",
                                    include_files=flatten_include_files,
                                    class_names=class_names,
                                    var_names=var_names,
