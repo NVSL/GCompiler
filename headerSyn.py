@@ -58,7 +58,7 @@ def get_args(catalog_element, connection_names):
         arg_type = an_arg.get("type")
         if arg_type == "const":
             args.append(an_arg.get("const"))
-        elif arg_type == "DigitalWireInterface":
+        elif arg_type == "DigitalWireInterface" or arg_type == "SPIInterface":
             args.append(get_net_literal(an_arg.get("net"), DIGITAL, connection_names))
         elif arg_type == "AnalogWireInterface":
             args.append(get_net_literal(an_arg.get("net"), ANALOG, connection_names))
