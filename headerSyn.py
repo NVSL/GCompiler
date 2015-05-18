@@ -130,10 +130,10 @@ def create_header_file(header_name, g_components):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Tool for generating .h file for Arduino given .gspec file")
-    parser.add_argument("-n", dest="header_name", required=True, help="The name of the header should be")
-    parser.add_argument("-g", dest="gspec", required=True, help="The path to the gspec file")
-    parser.add_argument("-c", dest="catalog", required=True, help="The path to the catalog file")
-    parser.add_argument("-t", dest="test", action="store_true", help="Generate test .ino file")
+    parser.add_argument("-n", "--header", dest="header_name", required=True, help="The name of the header should be")
+    parser.add_argument("-g", "--gspec", dest="gspec", required=True, help="The path to the gspec file")
+    parser.add_argument("-c", "--catalog", dest="catalog", required=True, help="The path to the catalog file")
+    parser.add_argument("-t", "--test", dest="test", action="store_true", help="Generate test .ino file")
     args = parser.parse_args()
 
     gspec_path = args.gspec
