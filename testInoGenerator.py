@@ -8,6 +8,9 @@ import clang.cindex
 import parseAST
 import asciitree
 from headerSyn import sketchbook_path
+import shutil
+
+dir_name = os.path.dirname(os.path.abspath(__file__))
 
 
 def generate_test_codes(header_name, g_components):
@@ -21,7 +24,7 @@ def generate_test_codes(header_name, g_components):
     #     loop_template = Template(filename=os.path.dirname(os.path.realpath(__file__)) + '/' + class_name + '_loop.txt')
     #     loop_codes.append(loop_template.render(var=component.var_name))
 
-    clang.cindex.Config.set_library_path('/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib')
+    clang.cindex.Config.set_library_path(dir_name)
     index = clang.cindex.Index.create()
 
     real_components = []
@@ -32,7 +35,7 @@ def generate_test_codes(header_name, g_components):
             if flag:
                 real_components.append(component)
 
-    testtemplate = Template(filename=os.path.dirname(os.path.realpath(__file__)) + '/testtemplate.txt')
+    testtemplate = Template(filename=os.path.join(dir_name, 'testtemplate.txt'))
     # testcodes = testtemplate.render(header_name=header_name, component_setups=setup_codes, component_loops=loop_codes, components=g_components)
     testcodes = testtemplate.render(header_name=header_name, components=real_components)
 
@@ -61,3 +64,19 @@ def check_method(header, index):
         flag = False
 
     return flag
+
+
+def generate_test_file(header_name, g_components, test_name=None):
+    if test_name is None:
+        test_name = os.path.splitext(header_name)[0] + '_test'
+    try:
+        test_dir_path = os.path.join(os.getcwd(), test_name)
+        if os.path.exists(test_dir_path):
+            shutil.rmtree(test_dir_path)
+        os.makedirs(test_dir_path)
+        test_codes = generate_test_codes(header_name, g_components)
+        f = open(os.path.join(test_dir_path, test_name + ".ino"), 'w')
+        f.write(test_codes)
+        f.close()
+    except Exception as e:
+        print e

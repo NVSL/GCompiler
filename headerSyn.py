@@ -153,11 +153,4 @@ if __name__ == "__main__":
     create_header_file(header_name, g_components)
 
     if args.test:
-        try:
-            test_codes = generate_test_codes(header_name, g_components)
-            f = open(os.path.splitext(header_name)[0] + '_test.ino', 'w')
-            f.write(test_codes)
-            f.close()
-        except Exception as e:
-            print e
-
+        generate_test_file(header_name, g_components)
