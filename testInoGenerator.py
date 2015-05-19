@@ -12,7 +12,7 @@ import shutil
 import sys
 
 dir_name = os.path.dirname(os.path.abspath(__file__))
-clang.cindex.Config.set_library_path('/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib')
+clang.cindex.Config.set_library_path(dir_name)
 
 
 def generate_test_codes(header_name, g_components):
@@ -104,14 +104,14 @@ def generate_test_file(header_name, g_components, test_name=None):
         print e
 
 
-if __name__ == "__main__":
-    print os.getcwd()
-    clang.cindex.Config.set_library_path('/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib')
-    index = clang.cindex.Index.create()
-    translation_unit = index.parse(sys.argv[1], ['-x', 'c++', '-std=c++11', '-D__CODE_GENERATOR__'])
-
-    print(asciitree.draw_tree(translation_unit.cursor, parseAST.node_children, parseAST.print_node))
-
-    classes = parseAST.build_classes(translation_unit.cursor)
-    # print(classes)
-    # generate_test_codes("LED.h", [])
+# if __name__ == "__main__":
+#     print os.getcwd()
+#     clang.cindex.Config.set_library_path('/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib')
+#     index = clang.cindex.Index.create()
+#     translation_unit = index.parse(sys.argv[1], ['-x', 'c++', '-std=c++11', '-D__CODE_GENERATOR__'])
+#
+#     print(asciitree.draw_tree(translation_unit.cursor, parseAST.node_children, parseAST.print_node))
+#
+#     classes = parseAST.build_classes(translation_unit.cursor)
+#     print(classes)
+#     generate_test_codes("LED.h", [])
