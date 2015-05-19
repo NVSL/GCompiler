@@ -31,6 +31,7 @@ class GComponent(object):
             if class_element is not None:
                 # print self.type
                 self.class_name = class_element.get("name")
+                print("Connecting args for " + self.var_name)
                 connection_names = component_element.findall("api/arg")
                 self.args = get_args(catalog_element, connection_names)
                 self.include_files = [include.get("file") for include in catalog_element.findall("API/arduino/include")]
@@ -48,8 +49,7 @@ class GComponent(object):
 
 
 def get_args(catalog_element, connection_names):
-    print("Connecting args...")
-    interfaces = catalog_element.find("electrical/interfaces")
+    # interfaces = catalog_element.find("electrical/interfaces")
     catalog_args = catalog_element.findall("API/arduino/class/arg")
     args = []
     for an_arg in catalog_args:
@@ -57,10 +57,16 @@ def get_args(catalog_element, connection_names):
         if arg_type == "const":
             args.append(an_arg.get("const"))
         elif arg_type == "DigitalWireInterface" or arg_type == "SPIInterface" or arg_type == "PWMInterface":
-            args.append(get_net_literal(an_arg.get("net"), DIGITAL, connection_names))
+            # Here I assume that if it is DigitalWireInterface, it can also be connected to AnalogWireInterface,
+            # since analog pins on Arduino can be used identically as digital pins
+            literal = get_net_literal(an_arg.get("net"), DIGITAL, connection_names)
+            if literal == "None":
+                literal = get_net_literal(an_arg.get("net"), ANALOG, connection_names)
+            args.append(literal)
         elif arg_type == "AnalogWireInterface":
             args.append(get_net_literal(an_arg.get("net"), ANALOG, connection_names))
 
+    print args
     return args
     # return [arg.get("digitalliteral") if check_interface(interfaces, arg) == DIGITAL else arg.get("analogliteral") for arg in connection_names]
 
@@ -74,7 +80,7 @@ def get_net_literal(arg_name, digital_or_analog, connection_names):
             elif digital_or_analog == ANALOG:
                 return c.get("analogliteral")
 
-    return None
+    return "None"
 
 
 # def check_interface(interfaces, arg_name):
@@ -97,8 +103,14 @@ def generate_header_codes(header_name, g_components):
     for component in g_components:
         if component.is_class:
             for include in component.include_files:
-                flatten_include_files.append(os.path.join(component.linked_as, include))
-                flatten_include_files.append(os.path.join(component.linked_as, os.path.splitext(include)[0] + ".cpp"))
+                # Check if the file exists
+                include_header_path = os.path.join(sketchbook_path, component.linked_as, include)
+                include_cpp_path = os.path.join(sketchbook_path, component.linked_as, os.path.splitext(include)[0] + ".cpp")
+                if os.path.isfile(include_header_path):
+                    flatten_include_files.append(os.path.join(component.linked_as, include))
+                if os.path.isfile(include_cpp_path):
+                    flatten_include_files.append(os.path.join(component.linked_as, os.path.splitext(include)[0] + ".cpp"))
+
 
     flatten_include_files = list(set(flatten_include_files))
 
