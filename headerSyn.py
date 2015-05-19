@@ -34,7 +34,7 @@ class GComponent(object):
                 self.class_name = class_element.get("name")
                 print("Connecting args for " + self.var_name)
                 connection_names = component_element.findall("api/arg")
-                self.args = get_args(catalog_element, connection_names)
+                self.args = get_args(self.var_name, catalog_element, connection_names)
                 self.include_files = [include.get("file") for include in catalog_element.findall("API/arduino/include")]
                 libdir = catalog_element.findall("API/arduino/libdirectory")
                 if len(libdir) > 0:
@@ -50,31 +50,44 @@ class GComponent(object):
             sys.exit(-1)
 
 
-def get_args(catalog_element, connection_names):
+def get_args(var_name, catalog_element, connection_names):
+    """
+    :param class_name: The class name of the component
+    :param catalog_element: The xml element in catalog of the component
+    :param connection_names: The xml element of electrical section
+    :return: A list of tuples of (ARG_NAME, ARG_VALUE)
+    """
     # interfaces = catalog_element.find("electrical/interfaces")
     catalog_args = catalog_element.findall("API/arduino/class/arg")
     args = []
     for an_arg in catalog_args:
         arg_type = an_arg.get("type")
+        arg_value = None
+        arg_name = None
         if arg_type == "const":
-            args.append(an_arg.get("const"))
+            arg_name = None
+            arg_value = an_arg.get("const")
         elif arg_type == "DigitalWireInterface" or arg_type == "SPIInterface" or arg_type == "PWMInterface":
             # Here I assume that if it is DigitalWireInterface, it can also be connected to AnalogWireInterface,
             # since analog pins on Arduino can be used identically as digital pins
             literal = get_net_literal(an_arg.get("net"), DIGITAL, connection_names)
             if literal == "None":
                 literal = get_net_literal(an_arg.get("net"), ANALOG, connection_names)
-            args.append(literal)
+            arg_name = (var_name + "_" + an_arg.get("net")).upper()
+            arg_value = literal
         elif arg_type == "AnalogWireInterface":
-            args.append(get_net_literal(an_arg.get("net"), ANALOG, connection_names))
+            arg_name = (var_name + "_" + an_arg.get("net")).upper()
+            arg_value = get_net_literal(an_arg.get("net"), ANALOG, connection_names)
 
-    print args
+        args.append((arg_name, arg_value))
+
+    # print args
     return args
     # return [arg.get("digitalliteral") if check_interface(interfaces, arg) == DIGITAL else arg.get("analogliteral") for arg in connection_names]
 
 
 def get_net_literal(arg_name, digital_or_analog, connection_names):
-    print("Getting net literal for " + arg_name)
+    # print("Getting net literal for " + arg_name)
     for c in connection_names:
         if c.get("arg") == arg_name:
             if digital_or_analog == DIGITAL:
@@ -113,24 +126,25 @@ def generate_header_codes(header_name, g_components):
                 if os.path.isfile(include_cpp_path):
                     flatten_include_files.append(os.path.join(component.linked_as, os.path.splitext(include)[0] + ".cpp"))
 
-
     flatten_include_files = list(set(flatten_include_files))
 
-    class_names = []
-    args = []
-    var_names = []
+    # class_names = []
+    # args = []
+    # var_names = []
+    real_components = []
 
     for component in g_components:
         if component.is_class:
-            class_names.append(component.class_name)
-            args.append(','.join(component.args))
-            var_names.append(component.var_name)
+            real_components.append(component)
+            # class_names.append(component.class_name)
+            # var_names.append(component.var_name)
+            # args.append(','.join(component.args))
 
-    file_text =  mytemplate.render(header_name=os.path.splitext(header_name)[0].upper() + "_H",
-                                   include_files=flatten_include_files,
-                                   class_names=class_names,
-                                   var_names=var_names,
-                                   args=args)
+    print args
+
+    file_text = mytemplate.render(header_name=os.path.splitext(header_name)[0].upper() + "_H",
+                                  include_files=flatten_include_files,
+                                  components=real_components)
 
     return file_text
 

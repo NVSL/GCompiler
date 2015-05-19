@@ -5,8 +5,14 @@
 #include "../${file}"
 % endfor
 
-% for idx, var in enumerate(var_names):
-${class_names[idx]} ${var}(${args[idx]});
+% for c in components:
+% for a in c.args:
+% if a[0] is not None:
+#define ${a[0]} ${a[1]}
+% endif
+% endfor
+${c.class_name} ${c.var_name}(${",".join([x[0] or x[1] for x in c.args])});
+
 % endfor
 
 #endif
