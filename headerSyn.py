@@ -24,6 +24,7 @@ class GComponent(object):
         self.path = ""
         # self.link_path = ""
         self.include_files = []
+        self.required_files = []
 
         try:
             catalog_element = catalog.getItems()[self.type]
@@ -40,6 +41,7 @@ class GComponent(object):
                     self.linked_as = catalog_element.findall("API/arduino/libdirectory")[0].get("link-as")
                     self.path = catalog_element.findall("API/arduino/libdirectory")[0].get("path")
                     # self.link_path = os.path.join(self.linked_as, self.path)
+                self.required_files = [r.get("file") for r in catalog_element.findall("API/arduino/required")]
             else:
                 self.is_class = False
 

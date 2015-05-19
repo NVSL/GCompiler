@@ -43,9 +43,16 @@ def generate_test_codes(header_name, g_components):
             if should_add_test_codes:
                 real_components.append(component)
 
+    # Add in required files
+    required_files = []
+    for component in g_components:
+        required_files.extend(component.required_files)
+
+    required_files = list(set(required_files))
+
     testtemplate = Template(filename=os.path.join(dir_name, 'testtemplate.txt'))
     # testcodes = testtemplate.render(header_name=header_name, component_setups=setup_codes, component_loops=loop_codes, components=g_components)
-    testcodes = testtemplate.render(header_name=header_name, components=real_components)
+    testcodes = testtemplate.render(header_name=header_name, components=real_components, required=required_files)
 
     return testcodes
 

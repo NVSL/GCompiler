@@ -1,4 +1,7 @@
 #include "${header_name}"
+% for r in required:
+#include "${r}"
+% endfor
 
 void setup()
 {
