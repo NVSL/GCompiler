@@ -174,7 +174,6 @@ def link_header_file(header_name):
             shutil.rmtree(dir_path)
     os.makedirs(dir_path)
     MakeLibraryLink.create_link(source, destination_path, sketchbook_path)
-    print "link completed"
 
 
 if __name__ == "__main__":

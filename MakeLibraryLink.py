@@ -31,9 +31,9 @@ def create_link(source, destination, sketch_lib_path):
     lib_path_relative = os.path.relpath(lib_path_abs, os.path.dirname(dest_path_abs))
     with cd(sketch_lib_path_abs):
         try:
-            print "Creating link for: " + lib_path_abs
-            print "Source: " + lib_path_relative
-            print "Dest: " + dest_path_relative
+            # print "Creating link for: " + lib_path_abs
+            # print "Source: " + lib_path_relative
+            # print "Dest: " + dest_path_relative
             os.symlink(lib_path_relative, dest_path_relative)
         except OSError as error:
             print "Error: " + str(error)
