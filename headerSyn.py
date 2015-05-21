@@ -8,6 +8,8 @@ from lxml import etree
 from ComponentCatalog import *
 from mako.template import Template
 # from itertools import chain
+import MakeLibraryLink
+import shutil
 
 sketchbook_path = "../../Designs/GadgetronSketchBook/libraries"
 dir_name = os.path.dirname(os.path.realpath(__file__))
@@ -154,6 +156,25 @@ def create_header_file(header_name, g_components):
     file_handler = open(header_name, 'w')
     file_handler.write(file_text)
     file_handler.close()
+    link_header_file(header_name)
+
+
+def link_header_file(header_name):
+    """
+    This function creates a sym link in GadgetronSketchBook directory
+    :param header_name: The path to the generated header file
+    :return:
+    """
+    source = header_name
+    dir_name = os.path.splitext(source)[0]
+    dir_path = os.path.join(sketchbook_path, dir_name)
+    destination_name = source
+    destination_path = os.path.join(dir_path, destination_name)
+    if os.path.exists(dir_path):
+            shutil.rmtree(dir_path)
+    os.makedirs(dir_path)
+    MakeLibraryLink.create_link(source, destination_path, sketchbook_path)
+    print "link completed"
 
 
 if __name__ == "__main__":
