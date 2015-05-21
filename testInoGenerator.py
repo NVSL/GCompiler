@@ -10,6 +10,7 @@ import asciitree
 import headerSyn
 import shutil
 import sys
+from subprocess import call
 
 dir_name = os.path.dirname(os.path.abspath(__file__))
 clang.cindex.Config.set_library_path(dir_name)
@@ -97,9 +98,12 @@ def generate_test_file(header_name, g_components, test_name=None):
             shutil.rmtree(test_dir_path)
         os.makedirs(test_dir_path)
         test_codes = generate_test_codes(header_name, g_components)
-        f = open(os.path.join(test_dir_path, test_name + ".ino"), 'w')
+        test_file_path = os.path.join(test_dir_path, test_name + ".ino")
+        f = open(test_file_path, 'w')
         f.write(test_codes)
         f.close()
+        # verify the generated test .ino file
+        call(["arduino", "--verify", test_file_path])
     except Exception as e:
         print e
 
