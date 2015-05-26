@@ -11,7 +11,11 @@
 #define ${a[0]} ${a[1]}
 % endif
 % endfor
+% if len(c.args) == 0:
+${c.class_name} ${c.var_name};
+% else:
 ${c.class_name} ${c.var_name}(${",".join([x[0] or x[1] for x in c.args])});
+% endif
 
 % endfor
 
