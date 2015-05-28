@@ -52,38 +52,76 @@ class GComponent(object):
             sys.exit(-1)
 
 
+class GArg(object):
+    def __init__(self, var_name, arg_element, connection_names):
+        self.element = arg_element
+        self.type = self.element.get("type")
+        self.value = None
+        self.name = None
+        self.preprocess = None
+        if self.type == "const":
+            self.value = self.element.get("const")
+        elif self.type == "DigitalWireInterface" \
+                or self.type == "SPIInterface" \
+                or self.type == "PWMInterface"\
+                or self.type == "SerialInterface":
+            literal = get_net_literal(self.element.get("net"), DIGITAL, connection_names)
+            if literal == "None":
+                literal = get_net_literal(self.element.get("net"), ANALOG, connection_names)
+            self.name = (var_name + "_" + self.element.get("net")).upper()
+            self.value = literal
+            self.preprocess = "define"
+        elif self.type == "AnalogWireInterface":
+            self.name = (var_name + "_" + self.element.get("net")).upper()
+            self.value = get_net_literal(self.element.get("net"), ANALOG, connection_names)
+            self.preprocess = "define"
+        elif self.type == "reference":
+            self.name = (var_name + "_" + self.element.get("class")).upper()
+            self.class_name = self.element.get("class")
+            self.factory_method = self.element.get("factory")
+            self.preprocess = "factory"
+            self.sub_args = []
+            sub_arg_elements = self.element.findall("arg")
+            for a in sub_arg_elements:
+                self.sub_args.append(GArg(var_name, a, connection_names))
+
+
 def get_args(var_name, catalog_element, connection_names):
     """
-    :param class_name: The class name of the component
+    :param var_name: The var name of the component
     :param catalog_element: The xml element in catalog of the component
     :param connection_names: The xml element of electrical section
     :return: A list of tuples of (ARG_NAME, ARG_VALUE)
     """
-    # interfaces = catalog_element.find("electrical/interfaces")
     catalog_args = catalog_element.findall("API/arduino/class/arg")
     args = []
     for an_arg in catalog_args:
-        arg_type = an_arg.get("type")
-        arg_value = None
-        arg_name = None
-        if arg_type == "const":
-            arg_name = None
-            arg_value = an_arg.get("const")
-        elif arg_type == "DigitalWireInterface" or arg_type == "SPIInterface" or arg_type == "PWMInterface":
-            # Here I assume that if it is DigitalWireInterface, it can also be connected to AnalogWireInterface,
-            # since analog pins on Arduino can be used identically as digital pins
-            literal = get_net_literal(an_arg.get("net"), DIGITAL, connection_names)
-            if literal == "None":
-                literal = get_net_literal(an_arg.get("net"), ANALOG, connection_names)
-            arg_name = (var_name + "_" + an_arg.get("net")).upper()
-            arg_value = literal
-        elif arg_type == "AnalogWireInterface":
-            arg_name = (var_name + "_" + an_arg.get("net")).upper()
-            arg_value = get_net_literal(an_arg.get("net"), ANALOG, connection_names)
+        args.append(GArg(var_name, an_arg, connection_names))
+        # arg_type = an_arg.get("type")
+        # arg_value = None
+        # arg_name = None
+        # if arg_type == "const":
+        #     arg_name = None
+        #     arg_value = an_arg.get("const")
+        #     action = None
+        # elif arg_type == "DigitalWireInterface" or arg_type == "SPIInterface" or arg_type == "PWMInterface":
+        #     # Here I assume that if it is DigitalWireInterface, it can also be connected to AnalogWireInterface,
+        #     # since analog pins on Arduino can be used identically as digital pins
+        #     literal = get_net_literal(an_arg.get("net"), DIGITAL, connection_names)
+        #     if literal == "None":
+        #         literal = get_net_literal(an_arg.get("net"), ANALOG, connection_names)
+        #     arg_name = (var_name + "_" + an_arg.get("net")).upper()
+        #     arg_value = literal
+        #     action = "define"
+        # elif arg_type == "AnalogWireInterface":
+        #     arg_name = (var_name + "_" + an_arg.get("net")).upper()
+        #     arg_value = get_net_literal(an_arg.get("net"), ANALOG, connection_names)
+        # elif arg_type == "reference":
+        #     arg_name = None
+        #     arg_value = an_arg.get("object")
+        #     action = "factory"
 
-        args.append((arg_name, arg_value))
-
-    # print args
+        # args.append((arg_name, arg_value, action))
     return args
     # return [arg.get("digitalliteral") if check_interface(interfaces, arg) == DIGITAL else arg.get("analogliteral") for arg in connection_names]
 
