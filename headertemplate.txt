@@ -15,7 +15,7 @@
         if a.preprocess == "define":
             result.append(a.name)
         elif a.preprocess == "factory":
-            if a.type == "reference":
+            if a.type == "pointer":
                 result.append("&" + a.name)
             elif a.type == "object":
                 result.append(a.name)

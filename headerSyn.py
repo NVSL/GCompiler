@@ -75,7 +75,7 @@ class GArg(object):
             self.name = (var_name + "_" + self.element.get("net")).upper()
             self.value = get_net_literal(self.element.get("net"), ANALOG, connection_names)
             self.preprocess = "define"
-        elif self.type == "reference":
+        elif self.type == "pointer" or self.type == "object":
             self.name = (var_name + "_" + self.element.get("class")).upper()
             self.class_name = self.element.get("class")
             self.factory_method = self.element.get("factory")
