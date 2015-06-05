@@ -29,7 +29,7 @@ def generate_test_codes(header_name, g_components):
         if component.is_class:
             should_add_test_codes = False
             for include in component.include_files:
-                flag = check_method(os.path.join(headerSyn.sketchbook_path, component.linked_as, include), component.class_name)
+                flag = validate_source_code(os.path.join(headerSyn.sketchbook_path, component.linked_as, include), component.class_name)
                 if flag:
                     should_add_test_codes = True
             if should_add_test_codes:
@@ -42,18 +42,18 @@ def generate_test_codes(header_name, g_components):
 
     required_files = list(set(required_files))
 
-    testtemplate = Template(filename=os.path.join(dir_name, 'testtemplate.mako'))
-    # testcodes = testtemplate.render(header_name=header_name, component_setups=setup_codes, component_loops=loop_codes, components=g_components)
+    testtemplate = Template(filename=os.path.join(dir_name, 'test_template.mako'))
     testcodes = testtemplate.render(header_name=header_name, components=real_components, required=required_files)
 
     return testcodes
 
 
-def check_method(header, class_name):
+def validate_source_code(header, class_name):
     """
+    Checking whether both setup() and loop() methods are in the source code
     :param header: The path to header file
     :param class_name: The class name we're looking for
-    :return: True if both setup() and loop() methods are in the class
+    :return: True if both setup() and loop() methods are in the source code
     """
     print "Check method for " + header
     has_setup = False

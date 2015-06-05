@@ -3,7 +3,7 @@
 import argparse
 import sys
 import os
-from testInoGenerator import *
+from testProgramGenerator import *
 from lxml import etree
 from ComponentCatalog import *
 from mako.template import Template
@@ -114,7 +114,7 @@ def get_net_literal(arg_name, digital_or_analog, connection_names):
 
 def generate_header_codes(header_name, g_components):
 
-    mytemplate = Template(filename=dir_name + '/headertemplate.mako')
+    header_template = Template(filename=dir_name + '/header_template.mako')
 
     flatten_include_files = []
     for component in g_components:
@@ -138,9 +138,9 @@ def generate_header_codes(header_name, g_components):
 
     print args
 
-    file_text = mytemplate.render(header_name=os.path.splitext(header_name)[0].upper() + "_H",
-                                  include_files=flatten_include_files,
-                                  components=real_components)
+    file_text = header_template.render(header_name=os.path.splitext(header_name)[0].upper() + "_H",
+                                       include_files=flatten_include_files,
+                                       components=real_components)
 
     return file_text
 
