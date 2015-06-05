@@ -22,15 +22,6 @@ def generate_test_codes(header_name, g_components):
     :param g_components: The Component objects
     :return: The generated test codes
     """
-    # setup_codes = []
-    # loop_codes = []
-    #
-    # for component in g_components:
-    #     class_name = component.class_name
-    #     setup_template = Template(filename=os.path.dirname(os.path.realpath(__file__)) + '/' + class_name + '_setup.txt')
-    #     setup_codes.append(setup_template.render(var=component.var_name))
-    #     loop_template = Template(filename=os.path.dirname(os.path.realpath(__file__)) + '/' + class_name + '_loop.txt')
-    #     loop_codes.append(loop_template.render(var=component.var_name))
 
     real_components = []
 
@@ -51,7 +42,7 @@ def generate_test_codes(header_name, g_components):
 
     required_files = list(set(required_files))
 
-    testtemplate = Template(filename=os.path.join(dir_name, 'testtemplate.txt'))
+    testtemplate = Template(filename=os.path.join(dir_name, 'testtemplate.mako'))
     # testcodes = testtemplate.render(header_name=header_name, component_setups=setup_codes, component_loops=loop_codes, components=g_components)
     testcodes = testtemplate.render(header_name=header_name, components=real_components, required=required_files)
 

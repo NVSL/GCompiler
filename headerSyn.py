@@ -91,39 +91,13 @@ def get_args(var_name, catalog_element, connection_names):
     :param var_name: The var name of the component
     :param catalog_element: The xml element in catalog of the component
     :param connection_names: The xml element of electrical section
-    :return: A list of tuples of (ARG_NAME, ARG_VALUE)
+    :return: A list of GArg objects
     """
     catalog_args = catalog_element.findall("API/arduino/class/arg")
     args = []
     for an_arg in catalog_args:
         args.append(GArg(var_name, an_arg, connection_names))
-        # arg_type = an_arg.get("type")
-        # arg_value = None
-        # arg_name = None
-        # if arg_type == "const":
-        #     arg_name = None
-        #     arg_value = an_arg.get("const")
-        #     action = None
-        # elif arg_type == "DigitalWireInterface" or arg_type == "SPIInterface" or arg_type == "PWMInterface":
-        #     # Here I assume that if it is DigitalWireInterface, it can also be connected to AnalogWireInterface,
-        #     # since analog pins on Arduino can be used identically as digital pins
-        #     literal = get_net_literal(an_arg.get("net"), DIGITAL, connection_names)
-        #     if literal == "None":
-        #         literal = get_net_literal(an_arg.get("net"), ANALOG, connection_names)
-        #     arg_name = (var_name + "_" + an_arg.get("net")).upper()
-        #     arg_value = literal
-        #     action = "define"
-        # elif arg_type == "AnalogWireInterface":
-        #     arg_name = (var_name + "_" + an_arg.get("net")).upper()
-        #     arg_value = get_net_literal(an_arg.get("net"), ANALOG, connection_names)
-        # elif arg_type == "reference":
-        #     arg_name = None
-        #     arg_value = an_arg.get("object")
-        #     action = "factory"
-
-        # args.append((arg_name, arg_value, action))
     return args
-    # return [arg.get("digitalliteral") if check_interface(interfaces, arg) == DIGITAL else arg.get("analogliteral") for arg in connection_names]
 
 
 def get_net_literal(arg_name, digital_or_analog, connection_names):
@@ -138,21 +112,9 @@ def get_net_literal(arg_name, digital_or_analog, connection_names):
     return "None"
 
 
-# def check_interface(interfaces, arg_name):
-#     for i in interfaces:
-#         # print i.get("net")
-#         if i.get("net") == arg_name.get("net"):
-#             if i.get("type") == "DigitalWireInterface":
-#                 return DIGITAL
-#             elif i.get("type") == "AnalogWireInterface":
-#                 return ANALOG
-#
-#     return None
-
-
 def generate_header_codes(header_name, g_components):
 
-    mytemplate = Template(filename=dir_name + '/headertemplate.txt')
+    mytemplate = Template(filename=dir_name + '/headertemplate.mako')
 
     flatten_include_files = []
     for component in g_components:
@@ -168,17 +130,11 @@ def generate_header_codes(header_name, g_components):
 
     flatten_include_files = list(set(flatten_include_files))
 
-    # class_names = []
-    # args = []
-    # var_names = []
     real_components = []
 
     for component in g_components:
         if component.is_class:
             real_components.append(component)
-            # class_names.append(component.class_name)
-            # var_names.append(component.var_name)
-            # args.append(','.join(component.args))
 
     print args
 
@@ -227,8 +183,6 @@ if __name__ == "__main__":
     header_name = args.header_name
     tree = etree.parse(gspec_path)
     gspec_root = tree.getroot()
-
-    # purified_gadget_name = "_".join(root.findtext("name").split())
 
     g_components = []
     catalog = ComponentCatalog(catalog_path)
