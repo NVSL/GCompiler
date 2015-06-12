@@ -13,6 +13,7 @@ import sys
 from subprocess import call
 
 dir_name = os.path.dirname(os.path.abspath(__file__))
+test_template_name = "test_template.mako"
 clang.cindex.Config.set_library_path(dir_name)
 
 
@@ -42,7 +43,7 @@ def generate_test_codes(header_name, g_components):
 
     required_files = list(set(required_files))
 
-    testtemplate = Template(filename=os.path.join(dir_name, 'test_template.mako'))
+    testtemplate = Template(filename=os.path.join(dir_name, test_template_name))
     testcodes = testtemplate.render(header_name=header_name, components=real_components, required=required_files)
 
     return testcodes
@@ -55,7 +56,7 @@ def validate_source_code(header, class_name):
     :param class_name: The class name we're looking for
     :return: True if both setup() and loop() methods are in the source code
     """
-    print "Check method for " + header
+    # print "Check method for " + header
     has_setup = False
     has_loop = False
     try:

@@ -13,6 +13,7 @@ import shutil
 
 sketchbook_path = "../../Designs/GadgetronSketchBook/libraries"
 dir_name = os.path.dirname(os.path.realpath(__file__))
+library_template_name = "header_template.mako"
 DIGITAL = "D"
 ANALOG = "A"
 
@@ -114,7 +115,7 @@ def get_net_literal(arg_name, digital_or_analog, connection_names):
 
 def generate_header_codes(header_name, g_components):
 
-    header_template = Template(filename=dir_name + '/header_template.mako')
+    header_template = Template(filename=os.path.join(dir_name, library_template_name))
 
     flatten_include_files = []
     for component in g_components:
