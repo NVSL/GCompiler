@@ -6,10 +6,8 @@ import os
 from mako.template import Template
 import clang.cindex
 import parseAST
-import asciitree
-import headerSyn
+import libraryGenerator
 import shutil
-import sys
 from subprocess import call
 
 dir_name = os.path.dirname(os.path.abspath(__file__))
@@ -30,7 +28,7 @@ def generate_test_codes(header_name, g_components):
         if component.is_class:
             should_add_test_codes = False
             for include in component.include_files:
-                flag = validate_source_code(os.path.join(headerSyn.sketchbook_path, component.linked_as, include), component.class_name)
+                flag = validate_source_code(os.path.join(libraryGenerator.sketchbook_path, component.linked_as, include), component.class_name)
                 if flag:
                     should_add_test_codes = True
             if should_add_test_codes:
