@@ -114,7 +114,8 @@ def get_net_literal(arg_name, digital_or_analog, connection_names):
 
 
 def generate_header_codes(header_name, g_components):
-
+    print "Generating header codes"
+    print "\tLoading template"
     header_template = Template(filename=os.path.join(dir_name, library_template_name))
 
     flatten_include_files = []
@@ -147,7 +148,10 @@ def generate_header_codes(header_name, g_components):
 
 
 def create_header_file(header_name, g_components):
+    print "Creating header file"
     file_text = generate_header_codes(header_name, g_components)
+    
+    print "Opening header"
     file_handler = open(header_name, 'w')
     file_handler.write(file_text)
     file_handler.close()
@@ -186,12 +190,16 @@ if __name__ == "__main__":
     gspec_root = tree.getroot()
 
     g_components = []
+    
+    print "Making catalog"
     catalog = ComponentCatalog(catalog_path)
 
+    print "Making components"
     for component_element in gspec_root.iter("component"):
         g_components.append(GComponent(component_element, catalog))
 
     create_header_file(header_name, g_components)
 
+    print "Making test program"
     if args.test:
         generate_test_file(header_name, g_components)

@@ -22,6 +22,8 @@ def generate_test_codes(header_name, g_components):
     :return: The generated test codes
     """
 
+    print "Generating test code"
+    
     real_components = []
 
     for component in g_components:
@@ -41,6 +43,7 @@ def generate_test_codes(header_name, g_components):
 
     required_files = list(set(required_files))
 
+    print "Using template "+os.path.join(dir_name, test_template_name)
     testtemplate = Template(filename=os.path.join(dir_name, test_template_name))
     testcodes = testtemplate.render(header_name=header_name, components=real_components, required=required_files)
 
@@ -89,11 +92,18 @@ def generate_test_file(header_name, g_components, test_name=None):
         os.makedirs(test_dir_path)
         test_codes = generate_test_codes(header_name, g_components)
         test_file_path = os.path.join(test_dir_path, test_name + ".ino")
+        print "Test code:"
+        print test_codes
+        print
+        print "Opening "+test_file_path+" for writing"
         f = open(test_file_path, 'w')
+        print "Writing"
         f.write(test_codes)
         f.close()
         # verify the generated test .ino file
+        print "Verifying"
         call(["arduino", "--verify", test_file_path])
+        print "Done"
     except Exception as e:
         print e
 
