@@ -19,6 +19,10 @@ ANALOG = "A"
 
 
 class GComponent(object):
+    """
+    This class holds the programming information for a gadget component.
+    The information is taken from the catalog file.
+    """
     def __init__(self, component_element, catalog):
         self.is_class = True
         self.var_name = component_element.get("progname")
@@ -28,54 +32,66 @@ class GComponent(object):
         # self.link_path = ""
         self.include_files = []
         self.required_files = []
+        self.example_code = None
 
-        try:
-            catalog_element = catalog.getItems()[self.type]
-            class_element = catalog_element.find("API/arduino/class")
-            if class_element is not None:
-                # print self.type
-                self.class_name = class_element.get("name")
-                print("Connecting args for " + self.var_name)
-                connection_names = component_element.findall("api/arg")
-                self.args = get_args(self.var_name, catalog_element, connection_names)
-                self.include_files = [include.get("file") for include in catalog_element.findall("API/arduino/include")]
-                libdir = catalog_element.findall("API/arduino/libdirectory")
-                if len(libdir) > 0:
-                    self.linked_as = catalog_element.findall("API/arduino/libdirectory")[0].get("link-as")
-                    self.path = catalog_element.findall("API/arduino/libdirectory")[0].get("path")
-                    # self.link_path = os.path.join(self.linked_as, self.path)
-                self.required_files = [r.get("file") for r in catalog_element.findall("API/arduino/required")]
-            else:
-                self.is_class = False
+        catalog_element = catalog.getItems()[self.type]
+        class_element = catalog_element.find("API/arduino/class")
+        if class_element is not None:
+            # print self.type
+            self.class_name = class_element.get("name")
+            print("Connecting args for " + self.var_name)
+            connection_names = component_element.findall("api/arg")
+            self.args = get_args(self.var_name, catalog_element, connection_names)
+            self.include_files = [include.get("file") for include in catalog_element.findall("API/arduino/include")]
+            libdir = catalog_element.findall("API/arduino/libdirectory")
+            
+            if len(libdir) > 0:
+                self.linked_as = catalog_element.findall("API/arduino/libdirectory")[0].get("link-as")
+                self.path = catalog_element.findall("API/arduino/libdirectory")[0].get("path")
 
-        except Exception as ex:
-            print ex
-            sys.exit(-1)
+                print
+                print "Finding example code for", self.type
+                if len(catalog_element.findall("API/arduino/example")) > 0:
+                    print self.type, "example code:", catalog_element.findall("API/arduino/example")[0].text
+                    self.example_code = Template(catalog_element.findall("API/arduino/example")[0].text)
+
+            self.required_files = [r.get("file") for r in catalog_element.findall("API/arduino/required")]
+        
+        else:
+            self.is_class = False
 
 
-class GArg(object):
+class GArg (object):
     def __init__(self, var_name, arg_element, connection_names):
         self.element = arg_element
         self.type = self.element.get("type")
         self.value = None
         self.name = None
         self.preprocess = None
+
+
         if self.type == "const":
             self.value = self.element.get("const")
+
         elif self.type == "DigitalWireInterface" \
                 or self.type == "SPIInterface" \
                 or self.type == "PWMInterface"\
                 or self.type == "SerialInterface":
+
             literal = get_net_literal(self.element.get("net"), DIGITAL, connection_names)
+
             if literal == "None":
                 literal = get_net_literal(self.element.get("net"), ANALOG, connection_names)
+
             self.name = (var_name + "_" + self.element.get("net")).upper()
             self.value = literal
             self.preprocess = "define"
+
         elif self.type == "AnalogWireInterface":
             self.name = (var_name + "_" + self.element.get("net")).upper()
             self.value = get_net_literal(self.element.get("net"), ANALOG, connection_names)
             self.preprocess = "define"
+
         elif self.type == "pointer" or self.type == "object":
             self.name = (var_name + "_" + self.element.get("class")).upper()
             self.class_name = self.element.get("class")
@@ -83,6 +99,7 @@ class GArg(object):
             self.preprocess = "factory"
             self.sub_args = []
             sub_arg_elements = self.element.findall("arg")
+            
             for a in sub_arg_elements:
                 self.sub_args.append(GArg(var_name, a, connection_names))
 
@@ -194,12 +211,15 @@ if __name__ == "__main__":
     print "Making catalog"
     catalog = ComponentCatalog(catalog_path)
 
-    print "Making components"
+    print "G Components:"
     for component_element in gspec_root.iter("component"):
         g_components.append(GComponent(component_element, catalog))
+        if g_components[-1].is_class:
+            print "component:", g_components[-1].var_name
 
     create_header_file(header_name, g_components)
 
     print "Making test program"
     if args.test:
+        print "Generating test program"
         generate_test_file(header_name, g_components)

@@ -19,13 +19,16 @@ class Function(object):
             canonical = t.get_canonical()
             # print 'Parameter type: ' + canonical.kind.name
             type_kind_name = canonical.kind.name
+
             if canonical.kind == clang.cindex.TypeKind.POINTER:
                 pointee = canonical.get_pointee()
                 type_displayname = pointee.get_declaration().displayname
                 # print pointee.get_declaration().displayname
+
             elif canonical.kind == clang.cindex.TypeKind.RECORD:
                 # print canonical.get_declaration().displayname
                 type_displayname = canonical.get_declaration().displayname
+                
             else:
                 # print canonical.kind.spelling
                 type_displayname = canonical.kind.spelling
@@ -75,9 +78,13 @@ def build_classes(cursor, file_name):
     :param file_name: The path to the source file being parsed
     :return: A list of Class objects
     """
+
+    print "Building classes"
+
     global FILE_NAME
     FILE_NAME = file_name
     result = []
+
     for c in cursor.get_children():
         # print "FILE_NAME = " + FILE_NAME
         # print "file name = " + c.location.file.name
@@ -107,7 +114,9 @@ if __name__ == "__main__":
     index = clang.cindex.Index.create()
     translation_unit = index.parse(sys.argv[1], ['-x', 'c++', '-std=c++11', '-D__CODE_GENERATOR__'])
     classes = build_classes(translation_unit.cursor)
+
     print(asciitree.draw_tree(translation_unit.cursor, node_children, print_node))
+
     for aClass in classes:
         print 'For class ' + aClass.name + ', public methods:'
         for aFunction in aClass.functions:
