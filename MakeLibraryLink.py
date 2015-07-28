@@ -34,7 +34,10 @@ def create_link(source, destination, sketch_lib_path):
             # print "Creating link for: " + lib_path_abs
             # print "Source: " + lib_path_relative
             # print "Dest: " + dest_path_relative
-            os.unlink(dest_path_relative)
+            try:
+                os.unlink(dest_path_relative)
+            except:
+                pass
             os.symlink(lib_path_relative, dest_path_relative)
         except OSError as error:
             print "Error: " + str(error)
