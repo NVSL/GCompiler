@@ -155,7 +155,7 @@ def generate_header_codes(header_name, g_components):
         if component.is_class:
             real_components.append(component)
 
-    print args
+    print "Args:", args
 
     file_text = header_template.render(header_name=os.path.splitext(header_name)[0].upper() + "_H",
                                        include_files=flatten_include_files,
