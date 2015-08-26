@@ -24,6 +24,9 @@ class GComponent(object):
     The information is taken from the catalog file.
     """
     def __init__(self, component_element, catalog):
+        print
+        print
+        print "Making new GComponent"
         self.is_class = True
         self.var_name = component_element.get("progname")
         self.type = component_element.get("type")
@@ -36,12 +39,24 @@ class GComponent(object):
 
         catalog_element = catalog.getItems()[self.type]
         class_element = catalog_element.find("API/arduino/class")
+
         if class_element is not None:
             # print self.type
             self.class_name = class_element.get("name")
-            print("Connecting args for " + self.var_name)
+            print "name:", self.class_name
+
+            print "Connecting args for " + self.var_name
             connection_names = component_element.findall("api/arg")
+
+            print 
+            print etree.dump(catalog_element)
+            print
+
             self.args = get_args(self.var_name, catalog_element, connection_names)
+            print "Args:"
+            for a in self.args:
+                print str(a)
+
             self.include_files = [include.get("file") for include in catalog_element.findall("API/arduino/include")]
             libdir = catalog_element.findall("API/arduino/libdirectory")
             
@@ -59,6 +74,7 @@ class GComponent(object):
         
         else:
             self.is_class = False
+            print "No class"
 
 
 class GArg (object):
@@ -69,6 +85,11 @@ class GArg (object):
         self.name = None
         self.preprocess = None
 
+        print "Making GArg"
+        print etree.dump(self.element)
+        print "End tree"
+
+        print "Type:", self.type
 
         if self.type == "const":
             self.value = self.element.get("const")
@@ -103,6 +124,15 @@ class GArg (object):
             for a in sub_arg_elements:
                 self.sub_args.append(GArg(var_name, a, connection_names))
 
+        else:
+            assert False, "Unknown GArg type: " + str(self.type)
+
+        print self.type is not None
+        assert (self.type is not None) or (self.name is not None) or (self.value is not None) or (self.preprocess is not None), str(self)
+
+    def __str__ (self):
+        string = "GArg{" + "type: " + str(self.type) + ", value: " + str(self.value) + ", name: " + str(self.name) + ", preprocess: " + str(self.preprocess) + " }"
+        return string
 
 def get_args(var_name, catalog_element, connection_names):
     """
@@ -126,8 +156,10 @@ def get_net_literal(arg_name, digital_or_analog, connection_names):
                 return c.get("digitalliteral")
             elif digital_or_analog == ANALOG:
                 return c.get("analogliteral")
-
-    return "None"
+            else:
+                assert False, "Digital or analog error: " + str(arg_name) + ", " + str(digital_or_analog) + ", " + str(connection_names)
+        else:
+            assert False, "Could not get net literal: " + str(arg_name) + " not equal to " + str(c.get("arg"))
 
 
 def generate_header_codes(header_name, g_components):
@@ -136,6 +168,9 @@ def generate_header_codes(header_name, g_components):
     header_template = Template(filename=os.path.join(dir_name, library_template_name))
 
     flatten_include_files = []
+
+    print "Component:", g_components[0].__dict__
+
     for component in g_components:
         if component.is_class:
             for include in component.include_files:
@@ -211,7 +246,9 @@ if __name__ == "__main__":
     print "Making catalog"
     catalog = ComponentCatalog(catalog_path)
 
-    print "G Components:"
+    print
+    print "api gspec:", 
+    print "G Components:", gspec_path
     for component_element in gspec_root.iter("component"):
         g_components.append(GComponent(component_element, catalog))
         if g_components[-1].is_class:
