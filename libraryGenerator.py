@@ -151,7 +151,7 @@ def get_args(var_name, catalog_element, connection_names):
 def get_net_literal(arg_name, digital_or_analog, connection_names):
     # print("Getting net literal for " + arg_name)
     for c in connection_names:
-        if c.get("arg") == arg_name:
+        if c.get("arg") == arg_name: # find the right connection for the arg
             if digital_or_analog == DIGITAL:
                 return c.get("digitalliteral")
             elif digital_or_analog == ANALOG:
@@ -159,7 +159,9 @@ def get_net_literal(arg_name, digital_or_analog, connection_names):
             else:
                 assert False, "Digital or analog error: " + str(arg_name) + ", " + str(digital_or_analog) + ", " + str(connection_names)
         else:
-            assert False, "Could not get net literal: " + str(arg_name) + " not equal to " + str(c.get("arg"))
+            # this happens when we don't have the right one
+            continue
+            #assert False, "Could not get net literal: " + str(arg_name) + " not equal to " + str(c.get("arg"))
 
 
 def generate_header_codes(header_name, g_components):
