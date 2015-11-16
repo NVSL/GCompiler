@@ -12,7 +12,7 @@ from subprocess import call
 
 dir_name = os.path.dirname(os.path.abspath(__file__))
 test_template_name = "test_template.mako"
-#clang.cindex.Config.set_library_path(dir_name)
+clang.cindex.Config.set_library_path(dir_name)
 
 
 def generate_test_codes(header_name, g_components):
@@ -28,11 +28,11 @@ def generate_test_codes(header_name, g_components):
 
     for component in g_components:
         if component.is_class:
-            should_add_test_codes = False
-            for include in component.include_files:
-                flag = validate_source_code(os.path.join(libraryGenerator.sketchbook_path, component.linked_as, include), component.class_name)
-                if flag:
-                    should_add_test_codes = True
+            should_add_test_codes = True
+            #for include in component.include_files:
+            #    flag = validate_source_code(os.path.join(libraryGenerator.sketchbook_path, component.linked_as, include), component.class_name)
+            #    if flag:
+            #        should_add_test_codes = True
             if should_add_test_codes:
                 real_components.append(component)
 
@@ -58,6 +58,18 @@ def generate_test_codes(header_name, g_components):
     code = indent(code, 2)
 
     testtemplate = Template(filename=os.path.join(dir_name, test_template_name))
+
+    print "Checking number of components:", len(real_components)
+    assert len(real_components) > 0
+    assert real_components[0].var_name is not None
+
+    print 
+    print "Components for setup:"
+    print real_components
+
+    print "First component:"
+    print real_components[0]
+
     testcodes = testtemplate.render(
                     header_name=header_name, 
                     components=real_components, 
@@ -119,8 +131,8 @@ def generate_test_file(header_name, g_components, test_name=None):
         f.write(test_codes)
         f.close()
         # verify the generated test .ino file
-        print "Verifying"
-        call(["arduino", "--verify", test_file_path])
+        #print "Verifying"
+        #call(["arduino", "--verify", test_file_path])
         print "Done"
     except Exception as e:
         print e

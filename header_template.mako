@@ -2,7 +2,7 @@
 #define ${header_name}
 
 % for file in include_files:
-#include "../${file}"
+#include "${file}"
 % endfor
 
 <%

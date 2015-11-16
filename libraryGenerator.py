@@ -37,6 +37,8 @@ class GComponent(object):
         self.required_files = []
         self.example_code = None
 
+        print self.var_name
+
         catalog_element = catalog.getItems()[self.type]
         class_element = catalog_element.find("API/arduino/class")
 
@@ -47,10 +49,12 @@ class GComponent(object):
 
             print "Connecting args for " + self.var_name
             connection_names = component_element.findall("api/arg")
+            ET.dump(component_element)
+            print "Connection names:", connection_names
 
-            print 
-            print etree.dump(catalog_element)
-            print
+            #print 
+            #print etree.dump(catalog_element)
+            #print
 
             self.args = get_args(self.var_name, catalog_element, connection_names)
             print "Args:"
@@ -58,7 +62,9 @@ class GComponent(object):
                 print str(a)
 
             self.include_files = [include.get("file") for include in catalog_element.findall("API/arduino/include")]
+            print "Include files:", self.include_files
             libdir = catalog_element.findall("API/arduino/libdirectory")
+            print "libdir:", libdir
             
             if len(libdir) > 0:
                 self.linked_as = catalog_element.findall("API/arduino/libdirectory")[0].get("link-as")
@@ -111,6 +117,7 @@ class GArg (object):
         elif self.type == "AnalogWireInterface":
             self.name = (var_name + "_" + self.element.get("net")).upper()
             self.value = get_net_literal(self.element.get("net"), ANALOG, connection_names)
+            assert self.value is not None
             self.preprocess = "define"
 
         elif self.type == "pointer" or self.type == "object":
@@ -128,7 +135,7 @@ class GArg (object):
             assert False, "Unknown GArg type: " + str(self.type)
 
         print self.type is not None
-        assert (self.type is not None) or (self.name is not None) or (self.value is not None) or (self.preprocess is not None), str(self)
+        assert (self.type is not None) and (self.name is not None) and (self.value is not None) and (self.preprocess is not None), str(self)
 
     def __str__ (self):
         string = "GArg{" + "type: " + str(self.type) + ", value: " + str(self.value) + ", name: " + str(self.name) + ", preprocess: " + str(self.preprocess) + " }"
@@ -149,7 +156,9 @@ def get_args(var_name, catalog_element, connection_names):
 
 
 def get_net_literal(arg_name, digital_or_analog, connection_names):
-    # print("Getting net literal for " + arg_name)
+    print "Getting net literal for " + arg_name
+    print "connection_names:", connection_names
+
     for c in connection_names:
         if c.get("arg") == arg_name: # find the right connection for the arg
             if digital_or_analog == DIGITAL:
@@ -162,27 +171,34 @@ def get_net_literal(arg_name, digital_or_analog, connection_names):
             # this happens when we don't have the right one
             continue
             #assert False, "Could not get net literal: " + str(arg_name) + " not equal to " + str(c.get("arg"))
+    assert False, "Could not find sutable connections: " + str(connection_names)
 
 
 def generate_header_codes(header_name, g_components):
     print "Generating header codes"
     print "\tLoading template"
+
     header_template = Template(filename=os.path.join(dir_name, library_template_name))
 
     flatten_include_files = []
 
-    print "Component:", g_components[0].__dict__
+    print "Components:"
+    for c in g_components:
+        print
+        print c.__dict__
 
     for component in g_components:
         if component.is_class:
             for include in component.include_files:
                 # Check if the file exists
-                include_header_path = os.path.join(sketchbook_path, component.linked_as, include)
-                include_cpp_path = os.path.join(sketchbook_path, component.linked_as, os.path.splitext(include)[0] + ".cpp")
-                if os.path.isfile(include_header_path):
-                    flatten_include_files.append(os.path.join(component.linked_as, include))
-                if os.path.isfile(include_cpp_path):
-                    flatten_include_files.append(os.path.join(component.linked_as, os.path.splitext(include)[0] + ".cpp"))
+                flatten_include_files.append(include)
+
+                #include_header_path = os.path.join(sketchbook_path, component.linked_as, include)
+                #include_cpp_path = os.path.join(sketchbook_path, component.linked_as, os.path.splitext(include)[0] + ".cpp")
+                #if os.path.isfile(include_header_path):
+                #    flatten_include_files.append(os.path.join(component.linked_as, include))
+                #if os.path.isfile(include_cpp_path):
+                #    flatten_include_files.append(os.path.join(component.linked_as, os.path.splitext(include)[0] + ".cpp"))
 
     flatten_include_files = list(set(flatten_include_files))
 
@@ -192,24 +208,39 @@ def generate_header_codes(header_name, g_components):
         if component.is_class:
             real_components.append(component)
 
+    print "Real components:", [c.var_name for c in real_components]
+
     print "Args:", args
 
     file_text = header_template.render(header_name=os.path.splitext(header_name)[0].upper() + "_H",
                                        include_files=flatten_include_files,
                                        components=real_components)
 
+    print file_text
+    #exit(-1)
+
     return file_text
 
 
-def create_header_file(header_name, g_components):
+def create_header_file(header_name, g_components, test_name):
     print "Creating header file"
     file_text = generate_header_codes(header_name, g_components)
-    
+
+
+    if test_name is not None:
+        test_header_name = os.path.join(test_name, header_name)
+        print "Saving test header as", test_header_name
+
+        test_file = open(test_header_name , 'w')
+        test_file.write(file_text)
+        test_file.close()
+        #link_header_file(test_header_name)
+
     print "Opening header"
     file_handler = open(header_name, 'w')
     file_handler.write(file_text)
     file_handler.close()
-    link_header_file(header_name)
+    #link_header_file(header_name)
 
 
 def link_header_file(header_name):
@@ -256,9 +287,12 @@ if __name__ == "__main__":
         if g_components[-1].is_class:
             print "component:", g_components[-1].var_name
 
-    create_header_file(header_name, g_components)
-
+    test_name = os.path.splitext(header_name)[0] + '_test'
     print "Making test program"
     if args.test:
         print "Generating test program"
-        generate_test_file(header_name, g_components)
+        generate_test_file(header_name, g_components, test_name=test_name)
+
+    create_header_file(header_name, g_components, test_name=test_name)
+
+    
