@@ -39,8 +39,8 @@ class GComponent(object):
 
         print self.var_name
 
-        catalog_element = catalog.getItems()[self.type]
-        class_element = catalog_element.find("API/arduino/class")
+        catalog_element = catalog.find_component(self.type)
+        class_element = catalog_element.et.find("API/arduino/class")
 
         if class_element is not None:
             # print self.type
@@ -61,22 +61,22 @@ class GComponent(object):
             for a in self.args:
                 print str(a)
 
-            self.include_files = [include.get("file") for include in catalog_element.findall("API/arduino/include")]
+            self.include_files = [include.get("file") for include in catalog_element.et.findall("API/arduino/include")]
             print "Include files:", self.include_files
-            libdir = catalog_element.findall("API/arduino/libdirectory")
+            libdir = catalog_element.et.findall("API/arduino/libdirectory")
             print "libdir:", libdir
             
             if len(libdir) > 0:
-                self.linked_as = catalog_element.findall("API/arduino/libdirectory")[0].get("link-as")
-                self.path = catalog_element.findall("API/arduino/libdirectory")[0].get("path")
+                self.linked_as = catalog_element.et.findall("API/arduino/libdirectory")[0].get("link-as")
+                self.path = catalog_element.et.findall("API/arduino/libdirectory")[0].get("path")
 
                 print
                 print "Finding example code for", self.type
-                if len(catalog_element.findall("API/arduino/example")) > 0:
-                    print self.type, "example code:", catalog_element.findall("API/arduino/example")[0].text
-                    self.example_code = Template(catalog_element.findall("API/arduino/example")[0].text)
+                if len(catalog_element.et.findall("API/arduino/example")) > 0:
+                    print self.type, "example code:", catalog_element.et.findall("API/arduino/example")[0].text
+                    self.example_code = Template(catalog_element.et.findall("API/arduino/example")[0].text)
 
-            self.required_files = [r.get("file") for r in catalog_element.findall("API/arduino/required")]
+            self.required_files = [r.get("file") for r in catalog_element.et.findall("API/arduino/required")]
         
         else:
             self.is_class = False
@@ -148,7 +148,7 @@ def get_args(var_name, catalog_element, connection_names):
     :param connection_names: The xml element of electrical section
     :return: A list of GArg objects
     """
-    catalog_args = catalog_element.findall("API/arduino/class/arg")
+    catalog_args = catalog_element.et.findall("API/arduino/class/arg")
     args = []
     for an_arg in catalog_args:
         args.append(GArg(var_name, an_arg, connection_names))
