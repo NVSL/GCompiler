@@ -28,18 +28,13 @@ def generate_test_codes(header_name, g_components):
 
     for component in g_components:
         if component.is_class:
-            should_add_test_codes = True
-            #for include in component.include_files:
-            #    flag = validate_source_code(os.path.join(libraryGenerator.sketchbook_path, component.linked_as, include), component.class_name)
-            #    if flag:
-            #        should_add_test_codes = True
-            if should_add_test_codes:
-                real_components.append(component)
+            real_components.append(component)
 
     # Add in required files
     required_files = []
     for component in g_components:
         required_files.extend(component.required_files)
+
 
     required_files = list(set(required_files))
 
@@ -48,6 +43,7 @@ def generate_test_codes(header_name, g_components):
     for component in g_components:
         print component.type, component.var_name, component.example_code
         if component.example_code is not None:
+            code = code + 'Serial.println("Testing {}...");\n'.format(component.var_name);
             code = code + component.example_code.render(var_name=component.var_name)
 
 
@@ -58,17 +54,6 @@ def generate_test_codes(header_name, g_components):
     code = indent(code, 2)
 
     testtemplate = Template(filename=os.path.join(dir_name, test_template_name))
-
-    print "Checking number of components:", len(real_components)
-    assert len(real_components) > 0
-    assert real_components[0].var_name is not None
-
-    print 
-    print "Components for setup:"
-    print real_components
-
-    print "First component:"
-    print real_components[0]
 
     testcodes = testtemplate.render(
                     header_name=header_name, 
@@ -90,24 +75,20 @@ def validate_source_code(header, class_name):
     print "Check method for " + header
     has_setup = False
     has_loop = False
-    try:
-        index = clang.cindex.Index.create()
-        translation_unit = index.parse(header, ['-x', 'c++', '-std=c++11', '-D__CODE_GENERATOR__'])
-        classes = parseAST.build_classes(translation_unit.cursor, header)
-        #print(asciitree.draw_tree(translation_unit.cursor, parseAST.node_children, parseAST.print_node))
-        for aClass in classes:
-            if aClass.name == class_name:
-                print 'For class ' + aClass.name + ', public methods:'
-                for aFunction in aClass.functions:
-                    print aFunction
-                    if "setup" == aFunction.name:
-                        has_setup = True
-                    if "loop" == aFunction.name:
-                        has_loop = True
 
-    except Exception as e:
-        print e
-        return False
+    index = clang.cindex.Index.create()
+    translation_unit = index.parse(header, ['-x', 'c++', '-std=c++11', '-D__CODE_GENERATOR__'])
+    classes = parseAST.build_classes(translation_unit.cursor, header)
+    #print(asciitree.draw_tree(translation_unit.cursor, parseAST.node_children, parseAST.print_node))
+    for aClass in classes:
+        if aClass.name == class_name:
+            print 'For class ' + aClass.name + ', public methods:'
+            for aFunction in aClass.functions:
+                print aFunction
+                if "setup" == aFunction.name:
+                    has_setup = True
+                if "loop" == aFunction.name:
+                    has_loop = True
 
     return has_setup #and has_loop # we are just using setup now
 
@@ -115,27 +96,25 @@ def validate_source_code(header, class_name):
 def generate_test_file(header_name, g_components, test_name=None):
     if test_name is None:
         test_name = os.path.splitext(header_name)[0] + '_test'
-    try:
-        test_dir_path = os.path.join(os.getcwd(), test_name)
-        if os.path.exists(test_dir_path):
-            shutil.rmtree(test_dir_path)
-        os.makedirs(test_dir_path)
-        test_codes = generate_test_codes(header_name, g_components)
-        test_file_path = os.path.join(test_dir_path, test_name + ".ino")
-        print "Test code:"
-        print test_codes
-        print
-        print "Opening "+test_file_path+" for writing"
-        f = open(test_file_path, 'w')
-        print "Writing"
-        f.write(test_codes)
-        f.close()
-        # verify the generated test .ino file
-        #print "Verifying"
-        #call(["arduino", "--verify", test_file_path])
-        print "Done"
-    except Exception as e:
-        print e
+
+    test_dir_path = os.path.join(os.getcwd(), test_name)
+    if os.path.exists(test_dir_path):
+        shutil.rmtree(test_dir_path)
+    os.makedirs(test_dir_path)
+    test_codes = generate_test_codes(header_name, g_components)
+    test_file_path = os.path.join(test_dir_path, test_name + ".ino")
+    print "Test code:"
+    print test_codes
+    print
+    print "Opening "+test_file_path+" for writing"
+    f = open(test_file_path, 'w')
+    print "Writing"
+    f.write(test_codes)
+    f.close()
+    # verify the generated test .ino file
+    #print "Verifying"
+    #call(["arduino", "--verify", test_file_path])
+    print "Done"
 
 
 # if __name__ == "__main__":
