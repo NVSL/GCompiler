@@ -210,7 +210,6 @@ def generate_header_codes(header_name, g_components):
 
     print "Real components:", [c.var_name for c in real_components]
 
-    print "Args:", args
 
     file_text = header_template.render(header_name=os.path.splitext(header_name)[0].upper() + "_H",
                                        include_files=flatten_include_files,

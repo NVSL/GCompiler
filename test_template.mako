@@ -5,9 +5,11 @@
 
 void setup()
 {
+  Serial.begin(9600);
 % for c in components:
   ${c.var_name}.setup();
 % endfor
+  
 }
 
 void loop()
