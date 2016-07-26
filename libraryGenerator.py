@@ -210,7 +210,6 @@ def generate_header_codes(header_name, g_components):
 
     print "Real components:", [c.var_name for c in real_components]
 
-
     file_text = header_template.render(header_name=os.path.splitext(header_name)[0].upper() + "_H",
                                        include_files=flatten_include_files,
                                        components=real_components)
@@ -282,6 +281,7 @@ if __name__ == "__main__":
     print "api gspec:", 
     print "G Components:", gspec_path
     for component_element in gspec_root.iter("component"):
+        ET.dump(component_element)
         g_components.append(GComponent(component_element, catalog))
         if g_components[-1].is_class:
             print "component:", g_components[-1].var_name

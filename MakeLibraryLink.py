@@ -59,8 +59,8 @@ if __name__ == "__main__":
         tree = etree.parse(gcom_path)
         gcom_root = tree.getroot()
 
-        lib_element = gcom_root.find(".//libdirectory")
-        if lib_element is not None:
+        lib_elements = gcom_root.findall(".//libdirectory")
+        for lib_element in lib_elements:
             linked_as = lib_element.get("link-as")
             path = lib_element.get("path")
             gcom_dir_path = os.path.dirname(gcom_path)
