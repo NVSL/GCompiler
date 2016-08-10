@@ -21,5 +21,4 @@ setup(name="GCompiler",
       },
       include_package_data=True,
       
-      
 )
