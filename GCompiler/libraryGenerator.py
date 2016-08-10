@@ -177,7 +177,7 @@ def generate_header_codes(header_name, g_components):
     print "Generating header codes"
     print "\tLoading template"
 
-    header_template = Template(filename=os.path.join(dir_name, library_template_name))
+    header_template = Template(filename=os.path.join(dir_name, "templates", library_template_name))
 
     flatten_include_files = []
 

@@ -52,7 +52,7 @@ def generate_test_codes(header_name, g_components):
 
     code = indent(code, 2)
 
-    testtemplate = Template(filename=os.path.join(dir_name, test_template_name))
+    testtemplate = Template(filename=os.path.join(dir_name, "templates", test_template_name))
 
     testcodes = testtemplate.render(
                     header_name=header_name, 
