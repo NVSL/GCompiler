@@ -5,13 +5,13 @@ __author__ = 'WeiPingLiao'
 import os
 import shutil
 
-import clang.cindex
-import parseAST
+#import clang.cindex
+#import parseAST
 from mako.template import Template
 
 dir_name = os.path.dirname(os.path.abspath(__file__))
 test_template_name = "test_template.mako"
-clang.cindex.Config.set_library_path(dir_name)
+#clang.cindex.Config.set_library_path(dir_name)
 
 
 def generate_test_codes(header_name, g_components):
@@ -64,32 +64,32 @@ def generate_test_codes(header_name, g_components):
     return testcodes
 
 
-def validate_source_code(header, class_name):
-    """
-    Checking whether both setup() and loop() methods are in the source code
-    :param header: The path to header file
-    :param class_name: The class name we're looking for
-    :return: True if both setup() and loop() methods are in the source code
-    """
-    print "Check method for " + header
-    has_setup = False
-    has_loop = False
+# def validate_source_code(header, class_name):
+#     """
+#     Checking whether both setup() and loop() methods are in the source code
+#     :param header: The path to header file
+#     :param class_name: The class name we're looking for
+#     :return: True if both setup() and loop() methods are in the source code
+#     """
+#     print "Check method for " + header
+#     has_setup = False
+#     has_loop = False
 
-    index = clang.cindex.Index.create()
-    translation_unit = index.parse(header, ['-x', 'c++', '-std=c++11', '-D__CODE_GENERATOR__'])
-    classes = parseAST.build_classes(translation_unit.cursor, header)
-    #print(asciitree.draw_tree(translation_unit.cursor, parseAST.node_children, parseAST.print_node))
-    for aClass in classes:
-        if aClass.name == class_name:
-            print 'For class ' + aClass.name + ', public methods:'
-            for aFunction in aClass.functions:
-                print aFunction
-                if "setup" == aFunction.name:
-                    has_setup = True
-                if "loop" == aFunction.name:
-                    has_loop = True
+#     index = clang.cindex.Index.create()
+#     translation_unit = index.parse(header, ['-x', 'c++', '-std=c++11', '-D__CODE_GENERATOR__'])
+#     classes = parseAST.build_classes(translation_unit.cursor, header)
+#     #print(asciitree.draw_tree(translation_unit.cursor, parseAST.node_children, parseAST.print_node))
+#     for aClass in classes:
+#         if aClass.name == class_name:
+#             print 'For class ' + aClass.name + ', public methods:'
+#             for aFunction in aClass.functions:
+#                 print aFunction
+#                 if "setup" == aFunction.name:
+#                     has_setup = True
+#                 if "loop" == aFunction.name:
+#                     has_loop = True
 
-    return has_setup #and has_loop # we are just using setup now
+#     return has_setup #and has_loop # we are just using setup now
 
 
 def generate_test_file(header_name, g_components, test_name=None):
