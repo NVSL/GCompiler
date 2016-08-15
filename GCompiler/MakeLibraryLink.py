@@ -44,7 +44,8 @@ def create_link(source, destination, sketch_lib_path):
 
 
 
-if __name__ == "__main__":
+
+def main():
     parser = argparse.ArgumentParser(description="Tool for making symbolic link for library of a component")
     parser.add_argument("-s", dest="sketch_lib_path", required=True, help="The path to libraries folder in SketchBook for Arduino IDE")
     parser.add_argument("-g", dest="gcom", required=True, nargs="+", help="The path to the gcom files")
@@ -70,3 +71,5 @@ if __name__ == "__main__":
             # print "lib_path = " + lib_path_abs
             # print "sketch_path = " + sketch_lib_path_abs
             # print "relative_path = " + lib_path_relative
+if __name__ == "__main__":
+    main()
