@@ -20,5 +20,11 @@ setup(name="GCompiler",
           "" : ["*.mako"]
       },
       include_package_data=True,
+      entry_points={
+        'console_scripts': [
+            'MakeLibraryLink.py = GCompiler.MakeLibraryLink:main',
+            'MakeLibraryLink = GCompiler.MakeLibraryLink:main',
+            ]
+        },
       
 )
