@@ -9,6 +9,8 @@ import GCompiler.MakeLibraryLink
 from GCompiler.testProgramGenerator import generate_test_file
 import os
 import shutil
+from Gadgetron.ComponentCatalog import TheComponentCatalog
+
 from mako.template import Template
 
 sketchbook_path = "../../Designs/GadgetronSketchBook/libraries"
@@ -23,7 +25,7 @@ class GComponent(object):
     The information is taken from the catalog file.
     """
 
-    def __init__(self, component_element, catalog):
+    def __init__(self, component_element):
         log.debug("Making new GComponent")
         self.is_class = True
         self.var_name = component_element.get("progname")
@@ -35,7 +37,7 @@ class GComponent(object):
         self.required_files = []
         self.example_code = None
 
-        catalog_element = catalog.find_component(self.type)
+        catalog_element = TheComponentCatalog().find_component(self.type)
         class_element = catalog_element.et.find("API/arduino/class")
 
         if class_element is not None:
