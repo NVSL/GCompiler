@@ -43,12 +43,12 @@ class GComponent(object):
         if class_element is not None:
             # print self.type
             self.class_name = class_element.get("name")
-            log.debug("name:", self.class_name)
+            log.debug("name: {}".format(self.class_name))
 
-            log.debug("Connecting args for " + self.var_name)
+            log.debug("Connecting args for {}".format(self.var_name))
             connection_names = component_element.findall("api/arg")
             #Gadgetron.ComponentCatalog.ET.dump(component_element)
-            log.debug("Connection names:", connection_names)
+            log.debug("Connection names: {}".format(connection_names))
 
             # print
             # print etree.dump(catalog_element)
@@ -60,17 +60,17 @@ class GComponent(object):
                 log.debug(str(a))
 
             self.include_files = [include.get("file") for include in catalog_element.et.findall("API/arduino/include")]
-            log.debug("Include files:", self.include_files)
+            log.debug("Include files: {}".format(self.include_files))
             libdir = catalog_element.et.findall("API/arduino/libdirectory")
-            log.debug("libdir:", libdir)
+            log.debug("libdir:  {}".format(libdir))
 
             if len(libdir) > 0:
                 self.linked_as = catalog_element.et.findall("API/arduino/libdirectory")[0].get("link-as")
                 self.path = catalog_element.et.findall("API/arduino/libdirectory")[0].get("path")
 
-                log.debug("Finding example code for", self.type)
+                log.debug("Finding example code for {}".format(self.type))
                 if len(catalog_element.et.findall("API/arduino/example")) > 0:
-                    log.debug(self.type, "example code:", catalog_element.et.findall("API/arduino/example")[0].text)
+                    log.debug( "{} example code: {}".format(self.type, catalog_element.et.findall("API/arduino/example")[0].text))
                     self.example_code = Template(catalog_element.et.findall("API/arduino/example")[0].text)
 
             self.required_files = [r.get("file") for r in catalog_element.et.findall("API/arduino/required")]
@@ -92,7 +92,7 @@ class GArg(object):
         log.debug(etree.dump(self.element))
         log.debug("End tree")
 
-        log.debug("Type:", self.type)
+        log.debug("Type: {}".format(self.type))
 
         if self.type == "const":
             self.value = self.element.get("const")
@@ -156,8 +156,8 @@ def get_args(var_name, catalog_element, connection_names):
 
 
 def get_net_literal(arg_name, digital_or_analog, connection_names):
-    log.debug("Getting net literal for " + arg_name)
-    log.debug("connection_names:", connection_names)
+    log.debug("Getting net literal for {}".format(arg_name))
+    log.debug("connection_names: {}".format(connection_names))
 
     for c in connection_names:
         if c.get("arg") == arg_name:  # find the right connection for the arg
@@ -202,7 +202,7 @@ def generate_header_codes(header_name, g_components):
         if component.is_class:
             real_components.append(component)
 
-    log.debug("Real components:", [c.var_name for c in real_components])
+    log.debug("Real components: {}".format([c.var_name for c in real_components]))
 
     file_text = header_template.render(header_name=os.path.splitext(header_name)[0].upper() + "_H",
                                        include_files=flatten_include_files,
