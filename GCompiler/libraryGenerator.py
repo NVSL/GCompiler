@@ -47,7 +47,7 @@ class GComponent(object):
 
             log.debug("Connecting args for " + self.var_name)
             connection_names = component_element.findall("api/arg")
-            Gadgetron.ComponentCatalog.ET.dump(component_element)
+            #Gadgetron.ComponentCatalog.ET.dump(component_element)
             log.debug("Connection names:", connection_names)
 
             # print
@@ -220,7 +220,7 @@ def create_header_file(header_name, g_components, test_name):
 
     if test_name is not None:
         test_header_name = os.path.join(test_name, header_name)
-        log.debug("Saving test header as", test_header_name)
+        log.debug("Saving test header as {}".format(test_header_name))
 
         test_file = open(test_header_name, 'w')
         test_file.write(file_text)
