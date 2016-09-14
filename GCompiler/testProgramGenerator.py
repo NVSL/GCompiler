@@ -21,7 +21,8 @@ def generate_test_codes(header_name, g_components):
     :return: The generated test codes
     """
 
-    print "Generating test code"
+
+    #print "Generating test code"
     
     real_components = []
 
@@ -37,10 +38,10 @@ def generate_test_codes(header_name, g_components):
 
     required_files = list(set(required_files))
 
-    print "Making code"
+    #print "Making code"
     code = ""
     for component in g_components:
-        print component.type, component.var_name, component.example_code
+        #print component.type, component.var_name, component.example_code
         if component.example_code is not None:
             code = code + 'Serial.println("Testing {}...");\n'.format(component.var_name);
             code = code + component.example_code.render(var_name=component.var_name)
@@ -102,18 +103,18 @@ def generate_test_file(header_name, g_components, test_name=None):
     os.makedirs(test_dir_path)
     test_codes = generate_test_codes(header_name, g_components)
     test_file_path = os.path.join(test_dir_path, test_name + ".ino")
-    print "Test code:"
-    print test_codes
-    print
-    print "Opening "+test_file_path+" for writing"
+    #print "Test code:"
+    #print test_codes
+    #print
+    #print "Opening "+test_file_path+" for writing"
     f = open(test_file_path, 'w')
-    print "Writing"
+    #print "Writing"
     f.write(test_codes)
     f.close()
     # verify the generated test .ino file
-    #print "Verifying"
+    ##print "Verifying"
     #call(["arduino", "--verify", test_file_path])
-    print "Done"
+    #print "Done"
 
 
 # if __name__ == "__main__":
