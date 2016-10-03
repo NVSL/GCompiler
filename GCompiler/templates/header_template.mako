@@ -1,9 +1,7 @@
 #ifndef ${header_name}
 #define ${header_name}
 
-% for file in include_files:
-#include "${file}"
-% endfor
+#include "Gadgetron.h"
 
 <%
     defined_names = []
