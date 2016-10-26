@@ -1,6 +1,4 @@
-% for r in required:
-#include "${r}"
-% endfor
+#include <Servo.h>
 #include "${header_name}"
 
 void setup()
