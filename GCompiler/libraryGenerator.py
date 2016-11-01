@@ -45,6 +45,8 @@ class GComponent(object):
 
             log.debug("Connecting args for " + self.var_name)
             connection_names = component_element.findall("api/arg")
+            assert len(connection_names) > 0, "No api args for {} '{}'".format(self.type, self.var_name)
+            
             Gadgetron.ComponentCatalog.ET.dump(component_element)
             log.debug("Connection names:", connection_names)
 
